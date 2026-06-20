@@ -1,0 +1,4 @@
+PyQt6>=6.6.0
+pyqtgraph>=0.13.3
+psutil>=5.9.8
+pywin32>=306
