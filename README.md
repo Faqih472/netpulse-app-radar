@@ -5,70 +5,26 @@ secara real-time (update setiap 1 detik), dikelompokkan per kategori,
 dengan fitur ranking terpisah. Desain dark theme dengan accent merah,
 terinspirasi command-center seperti Steam.
 
----
-
-## 🆕 Apa yang Berubah di Versi Ini (jawaban poin #1, #2, #3)
-
-### 1. Kategori aplikasi + list statis + Top Ranking terpisah
-
-- **Tab "Semua Aplikasi"** sekarang mengelompokkan semua aplikasi ke
-  dalam kategori (Browser, Game & Launcher, Chat & Komunikasi, Musik &
-  Video Streaming, Cloud & Sinkronisasi, Update & Background Service,
-  Sistem Windows, Pengembangan, Lainnya). Tiap kategori punya header
-  yang bisa diklik untuk **expand/collapse**.
-- Di dalam tiap kategori, aplikasi diurutkan **berdasarkan nama**
-  (bukan bandwidth), jadi **posisinya tidak loncat-loncat** tiap detik
-  — hanya angka MB/s-nya yang update live. Ini memudahkan kamu mencari
-  aplikasi tertentu karena tahu persis di mana posisinya.
-- **Tab "🏆 Top Ranking"** adalah fitur tambahan terpisah (bukan
-  pengganti list utama). Di sini ada 2 dropdown:
-  - **Urutkan berdasarkan**: Download tercepat / Upload tercepat /
-    Total terbesar sesi ini.
-  - **Tampilkan rentang**: 1-10 / 11-20 / 21-30 / dst — otomatis
-    menyesuaikan jumlah halaman dengan jumlah aplikasi yang terdeteksi.
-  - List di tab ini SENGAJA berubah urutan tiap detik (karena memang
-    tujuannya ranking live).
-
-### 2. Akurasi bandwidth diperbaiki total — sekarang pakai Packet Capture
-
-Versi sebelumnya pakai `psutil.io_counters()` sebagai proxy, yang
-**tidak akurat** untuk aplikasi seperti Steam (download besar tidak
-ter-capture dengan benar). Versi ini diganti total ke pendekatan
-**packet capture sungguhan** lewat **Npcap + scapy**:
-
-- Setiap paket yang lewat network card di-sniff langsung.
-- Byte asli dihitung per koneksi, lalu dipetakan ke proses pemilik
-  lewat port lokal (`psutil.net_connections()`).
-- Hasilnya: angka MB/s yang kamu lihat adalah **byte sungguhan dari
-  NIC**, sama akurasinya dengan Task Manager / GlassWire / NetLimiter.
-
-**Ini butuh instalasi Npcap satu kali** — lihat langkah instalasi di
-bawah. Jika Npcap belum terinstall, aplikasi otomatis jatuh ke mode
-fallback (kurang akurat, ada peringatan ⚠ di footer) supaya tetap bisa
-dipakai sambil kamu install Npcap.
-
-### 3. Arahan: file apa saja yang diubah
-
-Kalau kamu pernah copy project versi sebelumnya secara manual dan ingin
-tahu bagian mana yang perlu diganti, ini daftarnya:
-
-| File | Status | Apa yang berubah |
-|---|---|---|
-| `core/net_engine.py` | **Ganti total** | Engine diganti dari proxy `io_counters()` ke packet capture (scapy+Npcap), plus ditambah sistem kategori aplikasi (`classify_app`, `CATEGORY_RULES`) |
-| `core/worker.py` | **Diubah** | `CrossPlatformSampler` sekarang dibuat di dalam thread worker (bukan main thread) supaya sniffing tidak mengganggu UI; tambah signal `mode_ready` |
-| `core/app_model.py` | **Diubah kecil** | `AppState` punya field `category` baru, di-set dari sample |
-| `ui/main_window.py` | **Ganti total** | Struktur UI diubah dari 1 tabel dinamis menjadi 2 tab: "Semua Aplikasi" (statis per kategori) dan "🏆 Top Ranking" (dinamis dengan dropdown) |
-| `ui/theme.py` | **Ditambah** | Style baru untuk tab widget, header kategori, dan hint text |
-| `requirements.txt` | **Ditambah 1 baris** | Tambah `scapy>=2.5.0` |
-| `core/formatters.py` | Tidak berubah | — |
-| `ui/widgets.py` | Tidak berubah | — |
-| `main.py` | Tidak berubah | — |
-
-**Kalau kamu mulai dari nol** (extract ulang folder ini), tidak perlu
-peduli tabel di atas — tinggal pakai semua file yang ada di sini, semua
-sudah saling kompatibel.
+![status](https://img.shields.io/badge/platform-Windows-blue)
 
 ---
+## Fitur
+
+- **Live per-app bandwidth**: lihat MB/s naik-turun tiap aplikasi
+  (Chrome, Discord, game, dll) setiap 1 detik.
+- **Deteksi aplikasi mencurigakan**: aplikasi tanpa path jelas atau di
+  folder temp ditandai dengan badge ⚠ kuning, supaya kamu sadar ada
+  proses background yang diam-diam pakai data.
+- **Sparkline tren 30 detik** langsung di tabel, tanpa perlu klik apa-apa.
+- **Panel detail** dengan grafik history penuh 2 menit terakhir, total
+  data terpakai sesi ini, peak speed, dan daftar IP remote yang
+  terhubung.
+- **Search, sort, dan filter** (semua aplikasi / hanya yang aktif /
+  hanya yang mencurigakan).
+- **Total bandwidth sistem** real-time di bagian atas.
+
+---
+
 
 ## Instalasi (Windows)
 
