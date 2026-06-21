@@ -17,19 +17,31 @@ from core.net_engine import CrossPlatformSampler, ProcNetSample
 class SamplerWorker(QThread):
     sample_ready = pyqtSignal(list)   # List[ProcNetSample]
     error_occurred = pyqtSignal(str)
+    mode_ready = pyqtSignal(str, str)  # (mode, warning_message)
 
     def __init__(self, interval_sec: float = 1.0, parent=None):
         super().__init__(parent)
         self._interval = interval_sec
         self._running = False
-        self._sampler = CrossPlatformSampler()
+        self._sampler = None
+        self.sampler_mode = "initializing"
+        self.sampler_warning = ""
 
     @property
     def is_simulated(self) -> bool:
-        return self._sampler.is_simulated
+        return self.sampler_mode == "simulated"
 
     def run(self):
         self._running = True
+        # CrossPlatformSampler dibuat DI SINI (dalam thread worker, bukan
+        # main thread), supaya thread sniffing packet capture milik scapy
+        # (yang dijalankan di dalamnya) juga berjalan di luar main thread
+        # sejak awal, menjaga UI tetap responsif sepenuhnya.
+        self._sampler = CrossPlatformSampler()
+        self.sampler_mode = self._sampler.mode
+        self.sampler_warning = self._sampler.init_warning
+        self.mode_ready.emit(self.sampler_mode, self.sampler_warning)
+
         while self._running:
             t0 = time.monotonic()
             try:
@@ -49,4 +61,6 @@ class SamplerWorker(QThread):
 
     def stop(self):
         self._running = False
+        if self._sampler is not None:
+            self._sampler.stop()
         self.wait(2000)

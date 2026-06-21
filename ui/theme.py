@@ -339,4 +339,72 @@ QSplitter::handle {{
     color: {COLORS['text_faint']};
     font-size: 10.5px;
 }}
+
+/* ---------- Tab widget (Semua Aplikasi / Top Ranking) ---------- */
+#MainTabs::pane {{
+    border: none;
+    background-color: transparent;
+}}
+
+#MainTabs QTabBar::tab {{
+    background-color: {COLORS['bg_panel']};
+    color: {COLORS['text_muted']};
+    border: 1px solid {COLORS['border_soft']};
+    border-bottom: none;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding: 9px 18px;
+    margin-right: 4px;
+    font-weight: 600;
+    font-size: 12.5px;
+}}
+
+#MainTabs QTabBar::tab:selected {{
+    background-color: {COLORS['bg_panel_alt']};
+    color: {COLORS['red_glow']};
+    border: 1px solid {COLORS['red_dim']};
+    border-bottom: none;
+}}
+
+#MainTabs QTabBar::tab:hover:!selected {{
+    color: {COLORS['text_secondary']};
+}}
+
+/* ---------- Category header row (di dalam tabel Semua Aplikasi) ---------- */
+#CategoryHeaderRow {{
+    background-color: {COLORS['bg_panel_alt']};
+    border-bottom: 1px solid {COLORS['border_soft']};
+}}
+
+#CategoryHeaderLabel {{
+    color: {COLORS['text_primary']};
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}}
+
+#CategoryCountLabel {{
+    color: {COLORS['text_faint']};
+    font-size: 11px;
+}}
+
+#CategoryToggleBtn {{
+    background: transparent;
+    border: none;
+    color: {COLORS['red_glow']};
+    font-size: 12px;
+    font-weight: 700;
+    padding: 0px;
+}}
+
+#CategoryToggleBtn:hover {{
+    color: {COLORS['red_signal']};
+}}
+
+/* ---------- Hint text di atas tabel ---------- */
+#HintLabel {{
+    color: {COLORS['text_faint']};
+    font-size: 11px;
+    font-style: italic;
+}}
 """

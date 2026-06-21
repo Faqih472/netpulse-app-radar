@@ -21,6 +21,7 @@ class AppState:
     pid: int
     name: str
     exe_path: str
+    category: str = "Lainnya"
     icon_key: str = ""               # dipakai utk pilih warna/icon di UI
     download_history: Deque[float] = field(default_factory=lambda: deque([0.0] * HISTORY_LEN, maxlen=HISTORY_LEN))
     upload_history: Deque[float] = field(default_factory=lambda: deque([0.0] * HISTORY_LEN, maxlen=HISTORY_LEN))
@@ -36,6 +37,7 @@ class AppState:
     is_unknown_publisher: bool = False
 
     def push(self, sample: ProcNetSample, tick: int):
+        self.category = sample.category
         self.current_down = sample.download_bps
         self.current_up = sample.upload_bps
         self.download_history.append(sample.download_bps)
@@ -69,6 +71,7 @@ class AppRegistry:
             if s.pid not in self._apps:
                 self._apps[s.pid] = AppState(
                     pid=s.pid, name=s.name, exe_path=s.exe_path,
+                    category=s.category,
                 )
                 self._first_seen_total[s.pid] = (s.total_down, s.total_up)
 
