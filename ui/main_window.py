@@ -646,7 +646,22 @@ class MainWindow(QMainWindow):
 
         return states
 
+    def _save_scroll_pos(self, table: QTableWidget) -> int:
+        """Simpan posisi scroll vertikal tabel sebelum di-rebuild, supaya
+        bisa dikembalikan lagi setelah refresh -- jadi user yang sedang
+        scroll ke bawah tidak ke-reset ke atas tiap detik."""
+        return table.verticalScrollBar().value()
+
+    def _restore_scroll_pos(self, table: QTableWidget, pos: int):
+        """Kembalikan posisi scroll vertikal tabel setelah rebuild baris.
+        Di-clamp otomatis kalau jumlah baris berkurang sehingga posisi
+        lama sudah melebihi rentang yang valid."""
+        scrollbar = table.verticalScrollBar()
+        max_value = scrollbar.maximum()
+        scrollbar.setValue(min(pos, max_value))
+
     def _refresh_all_apps_table(self, states: Optional[List[AppState]] = None):
+        scroll_pos = self._save_scroll_pos(self.table)
         states = self._filtered_states_for_all_tab(states)
 
         by_category: Dict[str, List[AppState]] = defaultdict(list)
@@ -703,6 +718,7 @@ class MainWindow(QMainWindow):
             self.table.selectRow(new_select_row)
 
         self._merge_row_widgets(new_row_widgets)
+        self._restore_scroll_pos(self.table, scroll_pos)
 
     def _on_category_toggle(self, category: str, expanded: bool):
         if expanded:
@@ -713,6 +729,7 @@ class MainWindow(QMainWindow):
 
     # ---------------- TAB 2 rendering: ranking, dinamis ---------------
     def _refresh_ranking_table(self, states: Optional[List[AppState]] = None):
+        scroll_pos = self._save_scroll_pos(self.rank_table)
         if states is None:
             states = self.registry.get_all()
 
@@ -747,6 +764,7 @@ class MainWindow(QMainWindow):
             self.rank_table.selectRow(new_select_row)
 
         self._merge_row_widgets(new_row_widgets)
+        self._restore_scroll_pos(self.rank_table, scroll_pos)
 
     def _merge_row_widgets(self, new_entries: Dict[int, Dict]):
         for pid, entry in new_entries.items():
